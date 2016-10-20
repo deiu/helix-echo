@@ -5,8 +5,8 @@ import (
 	"os"
 	"time"
 
+	"github.com/deiu/helix"
 	"github.com/labstack/echo/engine/standard"
-	"github.com/linkeddata/helix"
 	"github.com/tylerb/graceful"
 )
 
