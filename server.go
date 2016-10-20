@@ -44,10 +44,12 @@ func NewServer() *echo.Echo {
 	e := echo.New()
 
 	// Utility Middleware
+	// enable logging
 	if len(os.Getenv("HELIX_LOGGING")) > 0 {
 		e.Use(middleware.Logger())
 	}
-	e.Use(middleware.Recover()) // recover from panics
+	// recover from panics
+	e.Use(middleware.Recover())
 
 	// Auth Middleware
 	// e.Use(middleware.BasicAuth(func(username, password string) bool {
