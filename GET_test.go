@@ -1,46 +1,38 @@
 package helix
 
 import (
-	"crypto/tls"
 	"io/ioutil"
 	"net/http"
-	"net/http/httptest"
-	// "os"
-	"strings"
 	"testing"
 
 	"github.com/labstack/echo"
-	"github.com/labstack/echo/engine/standard"
-	// "github.com/linkeddata/helix"
 	"github.com/stretchr/testify/assert"
 )
 
-var (
-	testServer *httptest.Server
-	testClient *http.Client
-)
-
-func init() {
-	// os.Setenv("HELIX_LOGGING", "true")
-	e := NewServer()
-	std := standard.WithTLS("127.0.0.1", "cert.pem", "key.pem")
-	std.SetHandler(e)
-
-	// testServer
-	testServer = httptest.NewTLSServer(std.Handler)
-	testServer.URL = strings.Replace(testServer.URL, "127.0.0.1", "localhost", 1)
-	// testClient
-	testClient = &http.Client{
-		Transport: &http.Transport{
-			TLSClientConfig: &tls.Config{
-				InsecureSkipVerify: true,
-			},
-		},
-	}
+func TestGETEmptyHandler(t *testing.T) {
+	assert.NoError(t, GetHandler(nil))
 }
 
-func TestGETHandler(t *testing.T) {
-	assert.NoError(t, GetHandler(nil))
+func TestGETCORS(t *testing.T) {
+	// Setup
+	req, err := http.NewRequest(echo.GET, testServer.URL, nil)
+	assert.NoError(t, err)
+	t.Run("Empty Origin", func(t *testing.T) {
+		res, err := testClient.Do(req)
+		assert.NoError(t, err)
+
+		// Assertions
+		assert.Equal(t, "*", res.Header.Get("Access-Control-Allow-Origin"))
+	})
+	t.Run("Set Origin", func(t *testing.T) {
+		exUri := "https://example.org"
+		req.Header.Set("Origin", exUri)
+		res, err := testClient.Do(req)
+		assert.NoError(t, err)
+
+		// Assertions
+		assert.Equal(t, exUri, res.Header.Get("Access-Control-Allow-Origin"))
+	})
 }
 
 func TestGETServerInfo(t *testing.T) {
