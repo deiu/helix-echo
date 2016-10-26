@@ -67,7 +67,7 @@ func NewServer() *echo.Echo {
 	handler.GET("/test/info", requestInfo)
 	// handler.GET("/test/stream", streamTime)
 	// CRUD Middleware
-	handler.OPTIONS("/*", HeadHandler)
+	handler.OPTIONS("/*", OptionsHandler)
 	handler.HEAD("/*", HeadHandler)
 	handler.GET("/*", GetHandler)
 	handler.POST("/*", PostHandler)
