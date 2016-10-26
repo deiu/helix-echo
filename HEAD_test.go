@@ -8,10 +8,10 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-func TestHEADHandler(t *testing.T) {
+func Test_HEAD_Handler(t *testing.T) {
 	assert.NoError(t, HeadHandler(nil))
 }
 
-func TestHEADRequest(t *testing.T) {
+func Test_HEAD_Request(t *testing.T) {
 
 }
