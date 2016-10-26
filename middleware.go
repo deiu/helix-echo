@@ -1,66 +1,65 @@
+// Extra middleware
 package helix
 
 import (
+	"fmt"
 	"net/http"
+	"strconv"
+	"sync"
+	"time"
+
+	"github.com/labstack/echo"
+	"github.com/labstack/echo/engine/standard"
 )
 
-var (
-	emptyHandler = http.Handler(http.HandlerFunc(func(w http.ResponseWriter, req *http.Request) {}))
+type (
+	Stats struct {
+		Uptime       time.Time      `json:"uptime"`
+		RequestCount uint64         `json:"requestCount"`
+		Statuses     map[string]int `json:"statuses"`
+		mutex        sync.RWMutex
+	}
 )
 
-type Middleware struct {
-	Wares []func(http.Handler) http.Handler
-}
-
-// Return an empty middleware that is ready to use
-func NewMiddleware() *Middleware {
-	return &Middleware{}
-}
-
-// Add a piece of middleware which is an http.Handler generator
-// (signature: func(http.Handler)http.Handler) which, somewhere before it
-// finishes, is expected to call .ServeHTTP on the handler that is passed to it.
-// Failure to call .ServeHTTP within the http.Handler generator will cause part
-// of the stack not to be called.
-func (mw *Middleware) Use(handler func(http.Handler) http.Handler) {
-	mw.Wares = append(mw.Wares, handler)
-}
-
-// Add a piece of middleware which is simply any http.Handler
-// (signature: http.Handler). Unlike with Use, we will automatically call
-// .ServeHTTP to ensure that the rest of the middleware stack is called.
-func (mw *Middleware) UseHandler(handler http.Handler) {
-	x := func(next http.Handler) http.Handler {
-		return http.HandlerFunc(func(w http.ResponseWriter, req *http.Request) {
-			handler.ServeHTTP(w, req)
-			next.ServeHTTP(w, req)
-		})
+func NewStats() *Stats {
+	return &Stats{
+		Uptime:   time.Now(),
+		Statuses: make(map[string]int),
 	}
-
-	mw.Use(x)
 }
 
-// Handler returns the composed handler of all the wares. Warning: you would need to
-// call this again if you change the wares.
-func (mw *Middleware) Handler() http.Handler {
-	//Initialize with an empty http.Handler
-	next := emptyHandler
-
-	//Call the middleware stack in FIFO order
-	for i := len(mw.Wares) - 1; i >= 0; i-- {
-		next = mw.Wares[i](next)
+// Process is the middleware function.
+func (s *Stats) StatsMiddleware(next echo.HandlerFunc) echo.HandlerFunc {
+	return func(c echo.Context) error {
+		if err := next(c); err != nil {
+			c.Error(err)
+		}
+		s.mutex.Lock()
+		defer s.mutex.Unlock()
+		s.RequestCount++
+		status := strconv.Itoa(c.Response().Status())
+		s.Statuses[status]++
+		return nil
 	}
-	return next
 }
 
-// Satisfies the net/http Handler interface and calls the middleware stack
-func (mw *Middleware) ServeHTTP(w http.ResponseWriter, req *http.Request) {
-	if len(mw.Wares) < 1 {
-		return
+func testRequestInfo(c echo.Context) error {
+	req := c.Request().(*standard.Request).Request
+	format := "\nProtocol: %s\nHost: %s\nMethod: %s\nPath: %s\n\n"
+	return c.HTML(http.StatusOK, fmt.Sprintf(format, req.Proto, req.Host, req.RemoteAddr, req.Method, req.URL))
+}
+
+// Handle is the endpoint to get stats.
+func (s *Stats) Handle(c echo.Context) error {
+	s.mutex.RLock()
+	defer s.mutex.RUnlock()
+	return c.JSON(http.StatusOK, s)
+}
+
+// ServerHeader middleware sets a Server header to the response.
+func ServerHeader(next echo.HandlerFunc) echo.HandlerFunc {
+	return func(c echo.Context) error {
+		c.Response().Header().Set(echo.HeaderServer, "Helix")
+		return next(c)
 	}
-
-	next := mw.Handler()
-
-	//Finally, serve back up the chain
-	next.ServeHTTP(w, req)
 }

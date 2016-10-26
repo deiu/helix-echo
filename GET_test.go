@@ -9,33 +9,21 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-func TestGETEmptyHandler(t *testing.T) {
+func Test_GET_HTTP2(t *testing.T) {
+	req, err := http.NewRequest("GET", testServer.URL, nil)
+	assert.NoError(t, err)
+
+	res, err := testClient.Do(req)
+	assert.NoError(t, err)
+	assert.Equal(t, http.StatusOK, res.StatusCode)
+	assert.True(t, res.ProtoAtLeast(2, 0))
+}
+
+func Test_GET_EmptyHandler(t *testing.T) {
 	assert.NoError(t, GetHandler(nil))
 }
 
-func TestGETCORS(t *testing.T) {
-	// Setup
-	req, err := http.NewRequest(echo.GET, testServer.URL, nil)
-	assert.NoError(t, err)
-	t.Run("Empty Origin", func(t *testing.T) {
-		res, err := testClient.Do(req)
-		assert.NoError(t, err)
-
-		// Assertions
-		assert.Equal(t, "*", res.Header.Get("Access-Control-Allow-Origin"))
-	})
-	t.Run("Set Origin", func(t *testing.T) {
-		exUri := "https://example.org"
-		req.Header.Set("Origin", exUri)
-		res, err := testClient.Do(req)
-		assert.NoError(t, err)
-
-		// Assertions
-		assert.Equal(t, exUri, res.Header.Get("Access-Control-Allow-Origin"))
-	})
-}
-
-func TestGETServerInfo(t *testing.T) {
+func Test_GET_ServerInfo(t *testing.T) {
 	// Setup
 	req, err := http.NewRequest(echo.GET, testServer.URL+"/test/info", nil)
 	assert.NoError(t, err)

@@ -6,6 +6,8 @@ import (
 	"net/http/httptest"
 	"strings"
 
+	"golang.org/x/net/http2"
+
 	"github.com/labstack/echo/engine/standard"
 )
 
@@ -23,12 +25,14 @@ func init() {
 
 	// testServer
 	testServer = httptest.NewTLSServer(std.Handler)
+	testServer.TLS.NextProtos = []string{"h2"}
 	testServer.URL = strings.Replace(testServer.URL, "127.0.0.1", "localhost", 1)
 	// testClient
 	testClient = &http.Client{
-		Transport: &http.Transport{
+		Transport: &http2.Transport{
 			TLSClientConfig: &tls.Config{
 				InsecureSkipVerify: true,
+				NextProtos:         []string{"h2"},
 			},
 		},
 	}

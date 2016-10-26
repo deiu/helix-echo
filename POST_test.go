@@ -8,10 +8,10 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-func TestPOSTHandler(t *testing.T) {
+func Test_POST_Handler(t *testing.T) {
 	assert.NoError(t, PostHandler(nil))
 }
 
-func TestPOSTRequest(t *testing.T) {
+func Test_POST_Request(t *testing.T) {
 
 }

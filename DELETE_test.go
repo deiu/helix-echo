@@ -8,10 +8,10 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-func TestDELETEHandler(t *testing.T) {
+func Test_DELETE_Handler(t *testing.T) {
 	assert.NoError(t, DeleteHandler(nil))
 }
 
-func TestDELETERequest(t *testing.T) {
+func Test_DELETE_Request(t *testing.T) {
 
 }
