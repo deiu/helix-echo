@@ -11,6 +11,14 @@ import (
 	"github.com/labstack/echo/middleware"
 )
 
+var (
+	methodsAll = []string{
+		"OPTIONS", "HEAD", "GET",
+		"PATCH", "POST", "PUT", "MKCOL", "DELETE",
+		"COPY", "MOVE", "LOCK", "UNLOCK",
+	}
+)
+
 //----------
 // Test Handlers
 //----------
@@ -26,11 +34,11 @@ func requestInfo(c echo.Context) error {
 // 	gone := res.(http.CloseNotifier).CloseNotify()
 // 	res.Header().Set(echo.HeaderContentType, "text/turtle")
 // 	res.WriteHeader(http.StatusOK)
-// 	ticker := time.NewTicker(1 * time.Second)
+// 	ticker := timhandler.NewTicker(1 * timhandler.Second)
 // 	defer ticker.Stop()
 
 // 	for {
-// 		fmt.Fprintf(res, "%v\n", time.Now())
+// 		fmt.Fprintf(res, "%v\n", timhandler.Now())
 // 		res.(http.Flusher).Flush()
 // 		select {
 // 		case <-ticker.C:
@@ -42,29 +50,29 @@ func requestInfo(c echo.Context) error {
 
 // NewServer creates a new server handler
 func NewServer() *echo.Echo {
-	e := echo.New()
+	handler := echo.New()
 
 	// Utility Middleware
 	// enable logging (change later)
 	if len(os.Getenv("HELIX_LOGGING")) > 0 {
-		e.Use(middleware.Logger())
+		handler.Use(middleware.Logger())
 	}
 	// recover from panics
-	e.Use(middleware.Recover())
+	handler.Use(middleware.Recover())
 	// CORS
-	e.Use(CORSHandler)
+	handler.Use(CORSHandler)
 
 	// Routes Middleware
 	// HTTP/2 test routes
-	e.GET("/test/info", requestInfo)
-	// e.GET("/test/stream", streamTime)
+	handler.GET("/test/info", requestInfo)
+	// handler.GET("/test/stream", streamTime)
 	// CRUD Middleware
-	e.OPTIONS("/*", HeadHandler)
-	e.HEAD("/*", HeadHandler)
-	e.GET("/*", GetHandler)
-	e.POST("/*", PostHandler)
-	e.PUT("/*", PutHandler)
-	e.DELETE("/*", DeleteHandler)
+	handler.OPTIONS("/*", HeadHandler)
+	handler.HEAD("/*", HeadHandler)
+	handler.GET("/*", GetHandler)
+	handler.POST("/*", PostHandler)
+	handler.PUT("/*", PutHandler)
+	handler.DELETE("/*", DeleteHandler)
 
-	return e
+	return handler
 }

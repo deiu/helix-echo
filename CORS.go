@@ -2,6 +2,7 @@ package helix
 
 import (
 	"github.com/labstack/echo"
+	"strings"
 )
 
 func CORSHandler(next echo.HandlerFunc) echo.HandlerFunc {
@@ -16,6 +17,18 @@ func CORSHandler(next echo.HandlerFunc) echo.HandlerFunc {
 		if len(origin) < 1 {
 			c.Response().Header().Set("Access-Control-Allow-Origin", "*")
 		}
+
+		corsReqH := c.Request().Header().Get("Access-Control-Request-Headers") // CORS preflight only
+		if len(corsReqH) > 0 {
+			c.Response().Header().Set("Access-Control-Allow-Headers", corsReqH)
+		}
+		corsReqM := c.Request().Header().Get("Access-Control-Request-Method") // CORS preflight only
+		if len(corsReqM) > 0 {
+			c.Response().Header().Set("Access-Control-Allow-Methods", corsReqM)
+		} else {
+			c.Response().Header().Set("Access-Control-Allow-Methods", strings.Join(methodsAll, ", "))
+		}
+
 		return nil
 	}
 }
