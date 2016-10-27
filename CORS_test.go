@@ -22,7 +22,7 @@ func Test_CORS_NoOrigin(t *testing.T) {
 	assert.Equal(t, "*", res.Header.Get("Access-Control-Allow-Origin"))
 }
 
-func Test_CORS_WithOrigin(t *testing.T) {
+func Test_CORS_Origin(t *testing.T) {
 	req, err := http.NewRequest("GET", testServer.URL, nil)
 	assert.NoError(t, err)
 
@@ -33,40 +33,39 @@ func Test_CORS_WithOrigin(t *testing.T) {
 	assert.Equal(t, exUri, res.Header.Get("Access-Control-Allow-Origin"))
 }
 func Test_CORS_AllowHeaders(t *testing.T) {
-	request, err := http.NewRequest("OPTIONS", testServer.URL, nil)
+	req, err := http.NewRequest("OPTIONS", testServer.URL, nil)
 	assert.NoError(t, err)
-	request.Header.Add("Access-Control-Request-Headers", "User, ETag")
-	response, err := testClient.Do(request)
+	req.Header.Add("Access-Control-Request-Headers", "User, ETag")
+	res, err := testClient.Do(req)
 	assert.NoError(t, err)
-	body, err := ioutil.ReadAll(response.Body)
-	response.Body.Close()
+	body, err := ioutil.ReadAll(res.Body)
+	res.Body.Close()
 	assert.Empty(t, string(body))
-	assert.Equal(t, 200, response.StatusCode)
-	assert.Equal(t, "User, ETag", response.Header.Get("Access-Control-Allow-Headers"))
+	assert.Equal(t, 200, res.StatusCode)
+	assert.Equal(t, "User, ETag", res.Header.Get("Access-Control-Allow-Headers"))
 }
 
-func Test_CORS_WithoutReqMethod(t *testing.T) {
-	request, err := http.NewRequest("OPTIONS", testServer.URL, nil)
+func Test_CORS_NoReqMethod(t *testing.T) {
+	req, err := http.NewRequest("OPTIONS", testServer.URL, nil)
 	assert.NoError(t, err)
-	// request.Header.Add("Access-Control-Request-Method", "PATCH")
-	response, err := testClient.Do(request)
+	res, err := testClient.Do(req)
 	assert.NoError(t, err)
-	body, err := ioutil.ReadAll(response.Body)
-	response.Body.Close()
+	body, err := ioutil.ReadAll(res.Body)
+	res.Body.Close()
 	assert.Empty(t, string(body))
-	assert.Equal(t, 200, response.StatusCode)
-	assert.Equal(t, strings.Join(methodsAll, ", "), response.Header.Get("Access-Control-Allow-Methods"))
+	assert.Equal(t, 200, res.StatusCode)
+	assert.Equal(t, strings.Join(methodsAll, ", "), res.Header.Get("Access-Control-Allow-Methods"))
 }
 
-func Test_CORS_WithReqMethod(t *testing.T) {
-	request, err := http.NewRequest("OPTIONS", testServer.URL, nil)
+func Test_CORS_ReqMethod(t *testing.T) {
+	req, err := http.NewRequest("OPTIONS", testServer.URL, nil)
 	assert.NoError(t, err)
-	request.Header.Add("Access-Control-Request-Method", "PATCH")
-	response, err := testClient.Do(request)
+	req.Header.Add("Access-Control-Request-Method", "PATCH")
+	res, err := testClient.Do(req)
 	assert.NoError(t, err)
-	body, err := ioutil.ReadAll(response.Body)
-	response.Body.Close()
+	body, err := ioutil.ReadAll(res.Body)
+	res.Body.Close()
 	assert.Empty(t, string(body))
-	assert.Equal(t, 200, response.StatusCode)
-	assert.Equal(t, "PATCH", response.Header.Get("Access-Control-Allow-Methods"))
+	assert.Equal(t, 200, res.StatusCode)
+	assert.Equal(t, "PATCH", res.Header.Get("Access-Control-Allow-Methods"))
 }
