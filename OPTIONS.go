@@ -1,8 +1,8 @@
 package helix
 
-import ()
-
 import (
+	"net/http"
+
 	"github.com/labstack/echo"
 )
 
@@ -10,5 +10,7 @@ import (
 // *http.Request). It sets extra headers that are needed for the CORS preflight
 // requests.
 func OptionsHandler(c echo.Context) error {
-	return nil
+
+	// Do not return content
+	return c.NoContent(http.StatusOK)
 }
