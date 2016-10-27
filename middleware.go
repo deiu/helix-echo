@@ -43,10 +43,10 @@ func (s *Stats) StatsMiddleware(next echo.HandlerFunc) echo.HandlerFunc {
 	}
 }
 
-func testRequestInfo(c echo.Context) error {
+func ServerInfo(c echo.Context) error {
 	req := c.Request().(*standard.Request).Request
-	format := "\nProtocol: %s\nHost: %s\nMethod: %s\nPath: %s\n\n"
-	return c.HTML(http.StatusOK, fmt.Sprintf(format, req.Proto, req.Host, req.RemoteAddr, req.Method, req.URL))
+	format := "\n<pre>\nProtocol: %s\nHost: %s\nMethod: %s\nPath: %s\n</pre>\n"
+	return c.HTML(http.StatusOK, fmt.Sprintf(format, req.Proto, req.Host, req.Method, req.URL))
 }
 
 // Handle is the endpoint to get stats.
