@@ -1,7 +1,7 @@
 package main
 
 import (
-	// "crypto/tls"
+	"flag"
 	"os"
 	"time"
 
@@ -11,23 +11,62 @@ import (
 )
 
 var (
-	SRV_PORT = os.Getenv("HELIX_PORT")
-	SRV_CERT = os.Getenv("HELIX_CERT")
-	SRV_KEY  = os.Getenv("HELIX_KEY")
+	conf  = *flag.String("conf", "", "use this configuration file")
+	port  = *flag.String("port", "8443", "HTTPS listener address")
+	debug = *flag.Bool("debug", false, "output extra logging?")
+	root  = *flag.String("root", ".", "path to file storage root")
+	cert  = *flag.String("cert", "", "TLS certificate eg. /path/to/cert.pem")
+	key   = *flag.String("key", "", "TLS certificate eg. /path/to/key.pem")
 )
 
+func init() {
+	flag.Parse()
+}
+
 func main() {
-	e := helix.NewServer()
+	// Configure server
+	config := helix.NewHelixConfig()
+	config.Conf = conf
+	if len(config.Conf) > 0 {
+		err := config.LoadJSONFile(config.Conf)
+		if err != nil {
+			println("Error loading config file:", err)
+			os.Exit(1)
+		}
+	}
+	// override loaded config with CLI params
+	if len(port) > 0 {
+		config.Port = port
+	}
+	if debug {
+		config.Debug = debug
+	}
+	if len(root) > 0 {
+		config.Root = root
+	}
+	if len(cert) > 0 {
+		config.Cert = cert
+	}
+	if len(key) > 0 {
+		config.Key = key
+	}
+
+	// Create a new server
+	e := helix.NewServer(config)
 	// Start server
 	println("Preparing server...")
-	println("Listening on port: " + SRV_PORT)
-	println("Loaded certificate from: " + SRV_CERT)
-	println("Loaded key from: " + SRV_KEY)
+	println("Listening on port: " + config.Port)
+	println("Loaded certificate from: " + config.Cert)
+	println("Loaded key from: " + config.Key)
 	// set config values
-	std := standard.WithTLS(":"+SRV_PORT, SRV_CERT, SRV_KEY)
+	std := standard.WithTLS(":"+config.Port, config.Cert, config.Key)
 	println("Server is listening for connections...")
 	// start server
-	e.Run(std)
+	err := e.Run(std)
+	if err != nil {
+		println("Error starting server:", err.Error())
+		os.Exit(1)
+	}
 	std.SetHandler(e)
-	graceful.ListenAndServe(std.Server, 5*time.Second)
+	graceful.ListenAndServe(std.Server, 10*time.Second)
 }

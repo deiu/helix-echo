@@ -18,8 +18,8 @@ var (
 
 func init() {
 	// uncomment for extra logging
-	// os.Setenv("HELIX_LOGGING", "true")
-	e := NewServer()
+	conf := NewHelixConfig()
+	e := NewServer(conf)
 	std := standard.WithTLS("127.0.0.1", "cert.pem", "key.pem")
 	std.SetHandler(e)
 

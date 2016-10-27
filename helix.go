@@ -1,8 +1,6 @@
 package helix
 
 import (
-	"os"
-
 	"github.com/labstack/echo"
 
 	"github.com/labstack/echo/middleware"
@@ -29,12 +27,12 @@ var (
 // }
 
 // NewServer creates a new server handler
-func NewServer() *echo.Echo {
+func NewServer(conf *HelixConfig) *echo.Echo {
 	handler := echo.New()
 
 	// Utility Middleware
 	// enable logging (change later)
-	if len(os.Getenv("HELIX_LOGGING")) > 0 {
+	if conf.Debug {
 		handler.Use(middleware.Logger())
 	}
 	// Server header
