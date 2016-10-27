@@ -7,9 +7,6 @@ import (
 
 func CORSHandler(next echo.HandlerFunc) echo.HandlerFunc {
 	return func(c echo.Context) error {
-		if err := next(c); err != nil {
-			c.Error(err)
-		}
 		origin := c.Request().Header().Get("Origin")
 		if len(origin) > 0 {
 			c.Response().Header().Set("Access-Control-Allow-Origin", origin)
@@ -29,6 +26,6 @@ func CORSHandler(next echo.HandlerFunc) echo.HandlerFunc {
 			c.Response().Header().Set("Access-Control-Allow-Methods", strings.Join(methodsAll, ", "))
 		}
 
-		return nil
+		return next(c)
 	}
 }
