@@ -32,9 +32,6 @@ var (
 func NewServer() *echo.Echo {
 	handler := echo.New()
 
-	// Redirect to HTTPS
-	handler.Pre(middleware.HTTPSRedirect())
-
 	// Utility Middleware
 	// enable logging (change later)
 	if len(os.Getenv("HELIX_LOGGING")) > 0 {
@@ -44,17 +41,17 @@ func NewServer() *echo.Echo {
 	handler.Use(ServerHeader)
 	// recover from panics
 	handler.Use(middleware.Recover())
-	// server stats
+
 	// CORS
 	handler.Use(CORSHandler)
 
-	// Routes Middleware
+	// ****** Routes Middleware ********
+
 	// Server info
-	handler.GET("/_info", ServerInfo)
-	// Stats
 	s := NewStats()
 	handler.Use(s.StatsMiddleware)
 	handler.GET("/_stats", s.Handle)
+	handler.GET("/_info", ServerInfo)
 
 	// CRUD Middleware
 	handler.OPTIONS("/*", OptionsHandler)
