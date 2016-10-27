@@ -23,8 +23,10 @@ func main() {
 	println("Listening on port: " + SRV_PORT)
 	println("Loaded certificate from: " + SRV_CERT)
 	println("Loaded key from: " + SRV_KEY)
+	// set config values
 	std := standard.WithTLS(":"+SRV_PORT, SRV_CERT, SRV_KEY)
 	println("Server is listening for connections...")
+	// start server
 	e.Run(std)
 	std.SetHandler(e)
 	graceful.ListenAndServe(std.Server, 5*time.Second)
