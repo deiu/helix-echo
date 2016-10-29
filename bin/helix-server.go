@@ -1,6 +1,7 @@
 package main
 
 import (
+	"crypto/tls"
 	"flag"
 	"os"
 	"time"
@@ -60,6 +61,19 @@ func main() {
 	println("Loaded key from: " + config.Key)
 	// set config values
 	std := standard.WithTLS(":"+config.Port, config.Cert, config.Key)
+	// use strong crypto
+	std.TLSConfig.MinVersion = tls.VersionTLS12
+	std.TLSConfig.PreferServerCipherSuites = true
+	std.TLSConfig.CurvePreferences = []tls.CurveID{tls.CurveP521, tls.CurveP384, tls.CurveP256}
+	std.TLSConfig.CipherSuites = []uint16{
+		tls.TLS_ECDHE_ECDSA_WITH_AES_128_GCM_SHA256,
+		tls.TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256,
+		tls.TLS_ECDHE_RSA_WITH_AES_256_CBC_SHA,
+		tls.TLS_ECDHE_RSA_WITH_AES_128_CBC_SHA,
+		tls.TLS_ECDHE_ECDSA_WITH_AES_256_CBC_SHA,
+		tls.TLS_ECDHE_ECDSA_WITH_AES_128_CBC_SHA,
+	}
+
 	println("Server is listening for connections...")
 	// start server
 	err := e.Run(std)

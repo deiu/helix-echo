@@ -13,6 +13,14 @@ var (
 	exUri = "https://example.org"
 )
 
+func TestHSTS(t *testing.T) {
+	request, err := http.NewRequest("HEAD", testServer.URL, nil)
+	assert.NoError(t, err)
+	response, err := testClient.Do(request)
+	assert.NoError(t, err)
+	assert.Equal(t, "max-age=63072000; includeSubDomains", response.Header.Get("Strict-Transport-Security"))
+}
+
 func Test_CORS_NoOrigin(t *testing.T) {
 	req, err := http.NewRequest("GET", testServer.URL, nil)
 	assert.NoError(t, err)

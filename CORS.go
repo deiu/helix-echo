@@ -26,6 +26,9 @@ func CORSHandler(next echo.HandlerFunc) echo.HandlerFunc {
 			c.Response().Header().Set("Access-Control-Allow-Methods", strings.Join(methodsAll, ", "))
 		}
 
+		// add HSTS
+		c.Response().Header().Set("Strict-Transport-Security", "max-age=63072000; includeSubDomains")
+
 		return next(c)
 	}
 }
