@@ -3,12 +3,10 @@ package main
 import (
 	"crypto/tls"
 	"flag"
+	"net/http"
 	"os"
-	"time"
 
 	"github.com/deiu/helix"
-	"github.com/labstack/echo/engine/standard"
-	"github.com/tylerb/graceful"
 )
 
 var (
@@ -25,6 +23,7 @@ func init() {
 }
 
 func main() {
+	var err error
 	// Configure server
 	config := helix.NewHelixConfig()
 	config.Conf = conf
@@ -56,16 +55,22 @@ func main() {
 	e := helix.NewServer(config)
 	// Start server
 	println("Preparing server...")
-	println("Listening on port: " + config.Port)
 	println("Loaded certificate from: " + config.Cert)
 	println("Loaded key from: " + config.Key)
+
 	// set config values
-	std := standard.WithTLS(":"+config.Port, config.Cert, config.Key)
+	s := &http.Server{
+		Addr:    ":" + config.Port,
+		Handler: e,
+	}
+
+	s.TLSConfig = new(tls.Config)
+	s.TLSConfig.MinVersion = tls.VersionTLS12
+	s.TLSConfig.NextProtos = []string{"h2"}
 	// use strong crypto
-	std.TLSConfig.MinVersion = tls.VersionTLS12
-	std.TLSConfig.PreferServerCipherSuites = true
-	std.TLSConfig.CurvePreferences = []tls.CurveID{tls.CurveP521, tls.CurveP384, tls.CurveP256}
-	std.TLSConfig.CipherSuites = []uint16{
+	s.TLSConfig.PreferServerCipherSuites = true
+	s.TLSConfig.CurvePreferences = []tls.CurveID{tls.CurveP521, tls.CurveP384, tls.CurveP256}
+	s.TLSConfig.CipherSuites = []uint16{
 		tls.TLS_ECDHE_ECDSA_WITH_AES_128_GCM_SHA256,
 		tls.TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256,
 		tls.TLS_ECDHE_RSA_WITH_AES_256_CBC_SHA,
@@ -73,14 +78,12 @@ func main() {
 		tls.TLS_ECDHE_ECDSA_WITH_AES_256_CBC_SHA,
 		tls.TLS_ECDHE_ECDSA_WITH_AES_128_CBC_SHA,
 	}
-
-	println("Server is listening for connections...")
-	// start server
-	err := e.Run(std)
+	s.TLSConfig.Certificates = make([]tls.Certificate, 1)
+	s.TLSConfig.Certificates[0], err = tls.LoadX509KeyPair(config.Cert, config.Key)
 	if err != nil {
-		println("Error starting server:", err.Error())
-		os.Exit(1)
+		return
 	}
-	std.SetHandler(e)
-	graceful.ListenAndServe(std.Server, 10*time.Second)
+
+	// start server
+	e.StartServer(s)
 }

@@ -9,7 +9,6 @@ import (
 	"time"
 
 	"github.com/labstack/echo"
-	"github.com/labstack/echo/engine/standard"
 )
 
 type (
@@ -37,14 +36,14 @@ func (s *Stats) StatsMiddleware(next echo.HandlerFunc) echo.HandlerFunc {
 		s.mutex.Lock()
 		defer s.mutex.Unlock()
 		s.RequestCount++
-		status := strconv.Itoa(c.Response().Status())
+		status := strconv.Itoa(c.Response().Status)
 		s.Statuses[status]++
 		return nil
 	}
 }
 
 func ServerInfo(c echo.Context) error {
-	req := c.Request().(*standard.Request).Request
+	req := c.Request()
 	format := "\n<pre>\nProtocol: %s\nHost: %s\nMethod: %s\nPath: %s\n</pre>\n"
 	return c.HTML(http.StatusOK, fmt.Sprintf(format, req.Proto, req.Host, req.Method, req.URL))
 }
@@ -59,7 +58,7 @@ func (s *Stats) Handle(c echo.Context) error {
 // ServerHeader middleware sets a Server header to the response.
 func ServerHeader(next echo.HandlerFunc) echo.HandlerFunc {
 	return func(c echo.Context) error {
-		c.Response().Header().Set(echo.HeaderServer, "Helix")
+		c.Response().Header().Set(echo.HeaderServer, "Helix-"+HELIX_VERSION)
 		return next(c)
 	}
 }

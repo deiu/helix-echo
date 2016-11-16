@@ -7,7 +7,7 @@ import (
 
 func CORSHandler(next echo.HandlerFunc) echo.HandlerFunc {
 	return func(c echo.Context) error {
-		origin := c.Request().Header().Get("Origin")
+		origin := c.Request().Header.Get("Origin")
 		if len(origin) > 0 {
 			c.Response().Header().Set("Access-Control-Allow-Origin", origin)
 		}
@@ -15,11 +15,11 @@ func CORSHandler(next echo.HandlerFunc) echo.HandlerFunc {
 			c.Response().Header().Set("Access-Control-Allow-Origin", "*")
 		}
 
-		corsReqH := c.Request().Header().Get("Access-Control-Request-Headers") // CORS preflight only
+		corsReqH := c.Request().Header.Get("Access-Control-Request-Headers") // CORS preflight only
 		if len(corsReqH) > 0 {
 			c.Response().Header().Set("Access-Control-Allow-Headers", corsReqH)
 		}
-		corsReqM := c.Request().Header().Get("Access-Control-Request-Method") // CORS preflight only
+		corsReqM := c.Request().Header.Get("Access-Control-Request-Method") // CORS preflight only
 		if len(corsReqM) > 0 {
 			c.Response().Header().Set("Access-Control-Allow-Methods", corsReqM)
 		} else {

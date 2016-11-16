@@ -7,7 +7,8 @@ import (
 )
 
 var (
-	methodsAll = []string{
+	HELIX_VERSION = "0.1"
+	methodsAll    = []string{
 		"OPTIONS", "HEAD", "GET",
 		"PATCH", "POST", "PUT", "MKCOL", "DELETE",
 		"COPY", "MOVE", "LOCK", "UNLOCK",
@@ -50,6 +51,7 @@ func NewServer(conf *HelixConfig) *echo.Echo {
 	handler.Use(s.StatsMiddleware)
 	handler.GET("/_stats", s.Handle)
 	handler.GET("/_info", ServerInfo)
+	handler.File("/empty.txt", "empty.txt")
 
 	// CRUD Middleware
 	handler.OPTIONS("/*", OptionsHandler)
