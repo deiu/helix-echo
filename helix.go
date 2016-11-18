@@ -9,23 +9,9 @@ import (
 var (
 	HELIX_VERSION = "0.1"
 	methodsAll    = []string{
-		"OPTIONS", "HEAD", "GET",
-		"PATCH", "POST", "PUT", "MKCOL", "DELETE",
-		"COPY", "MOVE", "LOCK", "UNLOCK",
+		"OPTIONS", "HEAD", "GET", "POST", "PUT", "PATCH", "DELETE",
 	}
 )
-
-// NewLoggerConfig formats the log to a specific template
-// func NewLoggerConfig() middleware.LoggerConfig {
-// 	return middleware.LoggerConfig{
-// 		Format: `[${time_rfc3339}] ${method} request for: ${uri} completed in (${latency_human})` + "\n" +
-// 			`[${time_rfc3339}] From: ${remote_ip}` + "\n" +
-// 			`[${time_rfc3339}] Status: ${status}` + "\n" +
-// 			`[${time_rfc3339}] Bytes in: ${bytes_in}` + "\n" +
-// 			`[${time_rfc3339}] Bytes out: ${bytes_out}` + "\n",
-// 		Output: os.Stdout,
-// 	}
-// }
 
 // NewServer creates a new server handler
 func NewServer(conf *HelixConfig) *echo.Echo {
@@ -33,8 +19,8 @@ func NewServer(conf *HelixConfig) *echo.Echo {
 
 	// Utility Middleware
 	// enable logging (change later)
-	if conf.Debug {
-		handler.Use(middleware.Logger())
+	if len(conf.Logfile) > 0 {
+		handler.Use(middleware.LoggerWithConfig(NewLoggerWithFile(conf.Logfile)))
 	}
 	// Server header
 	handler.Use(ServerHeader)
@@ -49,9 +35,8 @@ func NewServer(conf *HelixConfig) *echo.Echo {
 	// Server info
 	s := NewStats()
 	handler.Use(s.StatsMiddleware)
-	handler.GET("/_stats", s.Handle)
+	handler.GET("/_stats", s.Handler)
 	handler.GET("/_info", ServerInfo)
-	handler.File("/empty.txt", "empty.txt")
 
 	// CRUD Middleware
 	handler.OPTIONS("/*", OptionsHandler)
@@ -59,6 +44,7 @@ func NewServer(conf *HelixConfig) *echo.Echo {
 	handler.GET("/*", GetHandler)
 	handler.POST("/*", PostHandler)
 	handler.PUT("/*", PutHandler)
+	handler.PATCH("/*", PatchHandler)
 	handler.DELETE("/*", DeleteHandler)
 
 	return handler

@@ -49,7 +49,7 @@ func ServerInfo(c echo.Context) error {
 }
 
 // Handle is the endpoint to get stats.
-func (s *Stats) Handle(c echo.Context) error {
+func (s *Stats) Handler(c echo.Context) error {
 	s.mutex.RLock()
 	defer s.mutex.RUnlock()
 	return c.JSON(http.StatusOK, s)

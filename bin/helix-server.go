@@ -10,12 +10,13 @@ import (
 )
 
 var (
-	conf  = *flag.String("conf", "", "use this configuration file")
-	port  = *flag.String("port", "8443", "HTTPS listener address")
-	debug = *flag.Bool("debug", false, "output extra logging?")
-	root  = *flag.String("root", ".", "path to file storage root")
-	cert  = *flag.String("cert", "", "TLS certificate eg. /path/to/cert.pem")
-	key   = *flag.String("key", "", "TLS certificate eg. /path/to/key.pem")
+	conf    = flag.String("conf", "", "use this configuration file")
+	port    = flag.String("port", "8443", "HTTPS listener address")
+	debug   = flag.Bool("debug", false, "output extra logging?")
+	logfile = flag.String("log", "", "path to log file")
+	root    = flag.String("root", ".", "path to file storage root")
+	cert    = flag.String("cert", "", "TLS certificate eg. /path/to/cert.pem")
+	key     = flag.String("key", "", "TLS certificate eg. /path/to/key.pem")
 )
 
 func init() {
@@ -26,7 +27,7 @@ func main() {
 	var err error
 	// Configure server
 	config := helix.NewHelixConfig()
-	config.Conf = conf
+	config.Conf = *conf
 	if len(config.Conf) > 0 {
 		err := config.LoadJSONFile(config.Conf)
 		if err != nil {
@@ -35,20 +36,23 @@ func main() {
 		}
 	}
 	// override loaded config with CLI params
-	if len(port) > 0 {
-		config.Port = port
+	if len(*port) > 0 {
+		config.Port = *port
 	}
-	if debug {
-		config.Debug = debug
+	if *debug {
+		config.Debug = *debug
 	}
-	if len(root) > 0 {
-		config.Root = root
+	if len(*logfile) > 0 {
+		config.Logfile = *logfile
 	}
-	if len(cert) > 0 {
-		config.Cert = cert
+	if len(*root) > 0 {
+		config.Root = *root
 	}
-	if len(key) > 0 {
-		config.Key = key
+	if len(*cert) > 0 {
+		config.Cert = *cert
+	}
+	if len(*key) > 0 {
+		config.Key = *key
 	}
 
 	// Create a new server

@@ -9,21 +9,23 @@ import (
 )
 
 type HelixConfig struct {
-	Conf  string
-	Port  string
-	Debug bool
-	Root  string
-	Cert  string
-	Key   string
+	Conf    string
+	Port    string
+	Debug   bool
+	Logfile string
+	Root    string
+	Cert    string
+	Key     string
 }
 
 func NewHelixConfig() *HelixConfig {
 	return &HelixConfig{
-		Port:  "8443",
-		Root:  GetCurrentRoot(),
-		Debug: false,
-		Cert:  "test_cert.pem",
-		Key:   "test_key.pem",
+		Port:    "8443",
+		Root:    GetCurrentRoot(),
+		Debug:   false,
+		Logfile: "",
+		Cert:    "test_cert.pem",
+		Key:     "test_key.pem",
 	}
 }
 
