@@ -19,6 +19,10 @@ func Test_Conf_NewConfig(t *testing.T) {
 func Test_Conf_LoadJSONFile(t *testing.T) {
 	file := "test_conf.json"
 	conf := NewHelixConfig()
+	// fail to load inexisting file
+	conf = NewHelixConfig()
+	err := conf.LoadJSONFile(file)
+	assert.Error(t, err)
 	// change some config value
 	conf.Port = "8888"
 	data, err := json.Marshal(conf)

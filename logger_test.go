@@ -12,12 +12,13 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-func Test_Logger_NewLoggerWithFile(t *testing.T) {
+func Test_Logger_NewLoggerConfig(t *testing.T) {
 	conf := NewHelixConfig()
 	conf.Logfile = "helix.log"
 
-	loggerCfg := NewLoggerWithFile(conf.Logfile)
-	o := reflect.TypeOf(loggerCfg.Output).String()
+	logFile := conf.GetLogger()
+
+	o := reflect.TypeOf(logFile).String()
 	assert.Equal(t, "*os.File", o)
 	stat, err := os.Stat(conf.Logfile)
 	assert.NoError(t, err)

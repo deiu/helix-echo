@@ -4,11 +4,13 @@ package helix
 import (
 	"fmt"
 	"net/http"
+	"os"
 	"strconv"
 	"sync"
 	"time"
 
 	"github.com/labstack/echo"
+	"github.com/rs/zerolog"
 )
 
 type (
@@ -59,6 +61,18 @@ func (s *Stats) Handler(c echo.Context) error {
 func ServerHeader(next echo.HandlerFunc) echo.HandlerFunc {
 	return func(c echo.Context) error {
 		c.Response().Header().Set(echo.HeaderServer, "Helix-"+HELIX_VERSION)
+		return next(c)
+	}
+}
+
+func LoggerMiddleware(next echo.HandlerFunc) echo.HandlerFunc {
+	return func(c echo.Context) error {
+		logger = zerolog.New(os.Stderr).With().
+			Timestamp().
+			Str("Method", c.Request().Method).
+			Str("Path", c.Request().URL.String()).
+			Logger()
+
 		return next(c)
 	}
 }

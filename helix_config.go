@@ -2,6 +2,7 @@ package helix
 
 import (
 	"encoding/json"
+	"io"
 	"io/ioutil"
 	"log"
 	"os"
@@ -48,4 +49,15 @@ func GetCurrentRoot() string {
 		root += "/"
 	}
 	return root
+}
+
+func (c *HelixConfig) GetLogger() io.Writer {
+	if len(c.Logfile) == 0 {
+		return os.Stderr
+	}
+	file, err := os.OpenFile(c.Logfile, os.O_CREATE|os.O_APPEND|os.O_WRONLY, 0666)
+	if err != nil {
+		log.Fatal(err)
+	}
+	return file
 }

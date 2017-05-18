@@ -9,7 +9,7 @@ import (
 )
 
 func Test_PUT_Handler(t *testing.T) {
-	assert.NoError(t, DeleteHandler(nil))
+	assert.NoError(t, PutHandler(nil))
 }
 
 func Test_PUT_Request(t *testing.T) {
